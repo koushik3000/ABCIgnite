@@ -89,29 +89,15 @@ namespace ABCIgnite.Service
         }
 
 
-        /* public async Task<CreateBookingDTO> CreateAsync(CreateBookingDTO bookingDto)
-         {
-             var booking = new Booking
-             {
-                 MemberName = bookingDto.MemberName,
-                 ClassId = bookingDto.ClassId,
-                 ParticipationDate = bookingDto.ParticipationDate
-             };
-
-             var createdBooking = await _abcRepository.CreateAsync(booking);
-
-
-             return new CreateBookingDTO
-             {
-                 BookingId = createdBooking.BookingId,
-                 MemberName = createdBooking.MemberName,
-                 ClassId = createdBooking.ClassId,
-                 ParticipationDate = createdBooking.ParticipationDate
-             };
-         }*/
-
         public async Task<CreateBookingDTO> CreateAsync(CreateBookingDTO bookingDto)
         {
+            // Validate that the ParticipationDate is in the future (date only)
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (bookingDto.ParticipationDate <= currentDate)
+            {
+                throw new ArgumentException("Participation date must be in the future.");
+            }
+
             // Retrieve the class from the database to check capacity
             var classEntity = await _abcRepository.GetClassByIdAsync(bookingDto.ClassId);
 
@@ -151,7 +137,6 @@ namespace ABCIgnite.Service
                 ParticipationDate = createdBooking.ParticipationDate
             };
         }
-
 
     }
 }
